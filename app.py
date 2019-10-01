@@ -28,7 +28,7 @@ def playlists_index():
 @app.route('/playlists/new')
 def playlists_new():
     """Create a new playlist."""
-    return render_template('playlists_new.html', playlist={}, title="New Playlist")
+    return render_template('playlists_new.html', playlist={}, title='New Playlist')
 
 @app.route('/playlists', methods=['POST'])
 def playlists_submit():
@@ -52,7 +52,7 @@ def playlists_update(playlist_id):
     playlists.update_one(
         {'_id': ObjectId(playlist_id)},
         {'$set': updated_playlist})
-    return redirect(url_for('playlists_show', playlist_id=playlist_id)))    
+    return redirect(url_for('playlists_show', playlist_id=playlist_id))    
 
 @app.route('/playlists/<playlist_id>/edit')
 def playlists_edit(playlist_id):
