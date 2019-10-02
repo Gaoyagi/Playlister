@@ -15,27 +15,13 @@ db = client.get_default_database()
 playlists = db.playlists
 comments = db.comments
 
-# @app.route('/')
-# def index():
-#     """Return homepage."""
-#     return render_template('home.html', msg='Flask is Cool!!')
-
-#OUR MOCK ARRAY OF PROJECTS
-# playlists = [
-#     { 'title': 'Cat Videos', 'description': 'Cats acting weird' },
-#     { 'title': '80\'s Music', 'description': 'Don\'t stop believing!' }
-# ]
-
+#homepage
 @app.route('/')
 def playlists_index():
     """Show all playlists."""
     return render_template('playlists_index.html', playlists=playlists.find())
 
-@app.route('/playlists/new')
-def playlists_new():
-    """Create a new playlist."""
-    return render_template('playlists_new.html', playlist={}, title='New Playlist')
-
+#show existing play lists
 @app.route('/playlists/<playlist_id>')
 def playlists_show(playlist_id):
     """Show a single playlist."""
@@ -43,6 +29,13 @@ def playlists_show(playlist_id):
     playlist_comments = comments.find({'playlist_id': ObjectId(playlist_id)})
     return render_template('playlists_show.html', playlist=playlist, comments=playlist_comments)
 
+#show form for creating a new play list
+@app.route('/playlists/new')
+def playlists_new():
+    """Create a new playlist."""
+    return render_template('playlists_new.html', playlist={}, title='New Playlist')
+
+#adding the new playlist to the database
 @app.route('/playlists', methods=['POST'])
 def playlists_submit():
     """Submit a new playlist."""
@@ -54,6 +47,14 @@ def playlists_submit():
     playlist_id = playlists.insert_one(playlist).inserted_id
     return redirect(url_for('playlists_show', playlist_id=playlist_id))
 
+#shows page for editing a playlist
+@app.route('/playlists/<playlist_id>/edit')
+def playlists_edit(playlist_id):
+    """Show the edit form for a playlist."""
+    playlist = playlists.find_one({'_id': ObjectId(playlist_id)})
+    return render_template('playlists_edit.html', playlist=playlist, title='Edit Playlist')
+
+#the actual editing and updating of the playlist document
 @app.route('/playlists/<playlist_id>', methods=['POST'])
 def playlists_update(playlist_id):
     """Submit an edited playlist."""
@@ -67,18 +68,14 @@ def playlists_update(playlist_id):
         {'$set': updated_playlist})
     return redirect(url_for('playlists_show', playlist_id=playlist_id)) 
 
-@app.route('/playlists/<playlist_id>/edit')
-def playlists_edit(playlist_id):
-    """Show the edit form for a playlist."""
-    playlist = playlists.find_one({'_id': ObjectId(playlist_id)})
-    return render_template('playlists_edit.html', playlist=playlist, title='Edit Playlist')
-
+#deletes a play list
 @app.route('/playlists/<playlist_id>/delete', methods=['POST'])
 def playlists_delete(playlist_id):
     """Delete one playlist."""
     playlists.delete_one({'_id': ObjectId(playlist_id)})
     return redirect(url_for('playlists_index'))
 
+#add a comment to a playlist
 @app.route('/playlists/comments', methods=['POST'])
 def comments_new():
     """Submit a new comment."""
@@ -91,6 +88,7 @@ def comments_new():
     comment_id = comments.insert_one(comment).inserted_id
     return redirect(url_for('playlists_show', playlist_id=request.form.get('playlist_id')))
 
+#delete a comment from a playlist
 @app.route('/playlists/comments/<comment_id>', methods=['POST'])
 def comments_delete(comment_id):
     """Action to delete a comment."""
